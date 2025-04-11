@@ -124,17 +124,78 @@ remove_theme() {
   prompt_reboot
 }
 
-# Manually edit limine.conf
-edit_limine_conf() {
-  limine_conf=$(find_limine_conf)
-  if [[ -z "$limine_conf" ]]; then
-    echo -e "${RED}Error:${RESET} limine.conf not found in /boot."
-    return
-  fi
+# Function to choose the editor
+choose_editor() {
+    echo
+    echo "Choose a text editor to open the file:"
+    echo "1) nano"
+    echo "2) micro"
+    echo "3) vim"
+    echo "4) vi"
+    echo "5) ne"
+    echo "6) joe"
+    echo "7) emacs (terminal mode)"
+    echo "8) other (type the name)"
+    read -rp "Option [1-8]: " choice
 
-  echo -e "${GREEN}Opening:${RESET} $limine_conf"
-  nano "$limine_conf"
+    case "$choice" in
+        1) editor_cmd="nano" ;;
+        2) editor_cmd="micro" ;;
+        3) editor_cmd="vim" ;;
+        4) editor_cmd="vi" ;;
+        5) editor_cmd="ne" ;;
+        6) editor_cmd="joe" ;;
+        7) editor_cmd="emacs -nw" ;;
+        8)
+            read -rp "Enter the editor name: " editor_cmd
+            ;;
+        *)
+            echo "Invalid option. Using nano as default."
+            editor_cmd="nano"
+            ;;
+    esac
+
+    local editor_bin
+    editor_bin=$(awk '{print $1}' <<< "$editor_cmd")
+
+    if ! command -v "$editor_bin" >/dev/null 2>&1; then
+        echo
+        echo "[ERROR] The editor '$editor_bin' is not installed on the system."
+        echo "Install it before trying again."
+        echo
+        return 1
+    fi
 }
+
+# Function to pause (for consistent user interaction)
+pausar() {
+    echo
+    read -r -p "Press Enter to return to the main menu..." < /dev/tty
+    clear
+}
+
+# Manually edit limine.conf using the selected editor
+edit_limine_conf() {
+    limine_conf=$(find_limine_conf)
+    if [[ -z "$limine_conf" ]]; then
+        echo -e "${RED}Error:${RESET} limine.conf not found in /boot."
+        pausar
+        return
+    fi
+
+    choose_editor || {
+        echo -e "${RED}Editor selection canceled.${RESET}"
+        pausar
+        return
+    }
+
+    echo -e "${GREEN}Opening:${RESET} $limine_conf with: ${YELLOW}$editor_cmd${RESET}"
+    sleep 1
+    $editor_cmd "$limine_conf"
+    echo -e "${GREEN}Editing completed.${RESET}"
+    pausar
+}
+
 
 # Main menu loop
 while true; do
