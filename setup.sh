@@ -21,6 +21,7 @@ PARAMS=(
   "term_foreground_bright: cdd6f4"
   "timeout: 10"
   "wallpaper: boot():/cachyos.png"
+  "interface_branding:"
 )
 
 find_limine_conf() {
