@@ -168,7 +168,7 @@ choose_editor() {
 }
 
 # Function to pause (for consistent user interaction)
-pausar() {
+pause() {
     echo
     read -r -p "Press Enter to return to the main menu..." < /dev/tty
     clear
@@ -179,13 +179,13 @@ edit_limine_conf() {
     limine_conf=$(find_limine_conf)
     if [[ -z "$limine_conf" ]]; then
         echo -e "${RED}Error:${RESET} limine.conf not found in /boot."
-        pausar
+        pause
         return
     fi
 
     choose_editor || {
         echo -e "${RED}Editor selection canceled.${RESET}"
-        pausar
+        pause
         return
     }
 
@@ -193,7 +193,7 @@ edit_limine_conf() {
     sleep 1
     $editor_cmd "$limine_conf"
     echo -e "${GREEN}Editing completed.${RESET}"
-    pausar
+    pause
 }
 
 
